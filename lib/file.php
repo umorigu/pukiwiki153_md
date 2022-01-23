@@ -160,7 +160,7 @@ function make_str_rules($source)
 		$line = & $lines[$i]; // Modify directly
 
 		// Ignore null string and preformatted texts
-		if ($line == '' || $line{0} == ' ' || $line{0} == "\t") continue;
+		if ($line == '' || $line[0] == ' ' || $line[0] == "\t") continue;
 
 		// Modify this line?
 		if ($modify) {
@@ -454,7 +454,7 @@ function add_recent($page, $recentpage, $subject = '', $limit = 0)
 	flock($fp, LOCK_EX);
 	rewind($fp);
 	fputs($fp, '#freeze'    . "\n");
-	fputs($fp, '#norelated' . "\n"); // :)
+	fputs($fp, '!norelated' . "\n"); // :)
 	fputs($fp, join('', $lines));
 	flock($fp, LOCK_UN);
 	fclose($fp);
@@ -542,7 +542,7 @@ function lastmodified_add($update = '', $remove = '')
 	foreach ($recent_pages as $_page=>$time)
 		fputs($fp, '-' . htmlsc(format_date($time)) .
 			' - ' . '[[' . htmlsc($_page) . ']]' . "\n");
-	fputs($fp, '#norelated' . "\n"); // :)
+	fputs($fp, '!norelated' . "\n"); // :)
 
 	flock($fp, LOCK_UN);
 	fclose($fp);
@@ -607,7 +607,7 @@ function put_lastmodified()
 		$s_page    = htmlsc($page);
 		fputs($fp, '-' . $s_lastmod . ' - [[' . $s_page . ']]' . "\n");
 	}
-	fputs($fp, '#norelated' . "\n"); // :)
+	fputs($fp, '!norelated' . "\n"); // :)
 	flock($fp, LOCK_UN);
 	fclose($fp);
 
@@ -1089,4 +1089,25 @@ function prepare_links_related($page) {
 			links_init();
 		}
 	}
+}
+
+/**
+ * Markdown edit
+ */
+function add_notemd($wikitext)
+{
+	return "#notemd\n\n" . $wikitext;
+}
+
+function remove_notemd($wikitext)
+{
+	return preg_replace('/^\s*#notemd(\n|$)/m', '', $wikitext);
+}
+
+/**
+ * Get author info from wikitext
+ */
+function get_notemd($wikitext)
+{
+	return preg_match('/(^|\n)\#notemd\n/',$wikitext);
 }

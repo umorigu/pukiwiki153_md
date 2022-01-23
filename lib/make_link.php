@@ -80,15 +80,15 @@ class InlineConverter
 				'plugin',        // Inline plugins
 				'note',          // Footnotes
 				'url',           // URLs
-				'url_interwiki', // URLs (interwiki definition)
-				'mailto',        // mailto: URL schemes
-				'interwikiname', // InterWikiNames
+				// 'url_interwiki', // URLs (interwiki definition)
+				// 'mailto',        // mailto: URL schemes
+				// 'interwikiname', // InterWikiNames
 				'autoalias',     // AutoAlias
 				'autolink',      // AutoLinks
 				'bracketname',   // BracketNames
 				'wikiname',      // WikiNames
-				'autoalias_a',   // AutoAlias(alphabet)
-				'autolink_a',    // AutoLinks(alphabet)
+				// 'autoalias_a',   // AutoAlias(alphabet)
+				// 'autolink_a',    // AutoLinks(alphabet)
 			);
 		}
 
@@ -114,13 +114,18 @@ class InlineConverter
 
 	function convert($string, $page)
 	{
+		global $markdown_safemode;
+		
 		$this->page   = $page;
 		$this->result = array();
 
 		$string = preg_replace_callback('/' . $this->pattern . '/x',
 			array(& $this, 'replace'), $string);
-
-		$arr = explode("\x08", make_line_rules(htmlsc($string)));
+		if ($markdown_safemode == 1){
+			$arr = explode("\x08", make_line_rules(htmlsc($string)));
+		} else {
+			$arr = explode("\x08", make_line_rules($string));
+		}
 		$retval = '';
 		while (! empty($arr)) {
 			$retval .= array_shift($arr) . array_shift($this->result);
@@ -904,7 +909,7 @@ function get_fullname($name, $refer)
 	if ($name == '' || $name == './') return $refer;
 
 	// Absolute path
-	if ($name{0} == '/') {
+	if ($name[0] == '/') {
 		$name = substr($name, 1);
 		return ($name == '') ? $defaultpage : $name;
 	}
@@ -1044,7 +1049,7 @@ function init_autoticketlink_def_page()
 		return;
 	}
 	$body = <<<EOS
-#freeze
+!freeze
 * AutoTicketLink definition [#def]
 
 Reference: https://pukiwiki.osdn.jp/?AutoTicketLink
@@ -1072,7 +1077,7 @@ function init_autoalias_def_page()
 		return;
 	}
 	$body = <<<EOS
-#freeze
+!freeze
 *AutoAliasName [#qf9311bb]
 AutoAlias definition
 
